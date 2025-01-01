@@ -1,19 +1,37 @@
 import os
-import re
-import yt_dlp
 
-def extract_date_from_description(description):
-    """Extract and format a date from a video's description."""
-    # Regular expression to find MM/DD/YYYY dates
-    date_regex = r'\b(\d{2})/(\d{2})/(\d{4})\b'
-    date_match = re.search(date_regex, description)
+def list_files_in_directory(directory):
+    """
+    List all files in the given directory.
 
-    if date_match:
-        # Convert MM/DD/YYYY to YYYY-MM-DD
-        return f"{date_match.group(3)}-{date_match.group(1)}-{date_match.group(2)}"
-    return None
+    :param directory: The path to the directory to scan.
+    :return: A list of filenames in the directory.
+    """
+    try:
+        # Check if the directory exists
+        if not os.path.exists(directory):
+            print(f"Error: Directory '{directory}' does not exist.")
+            return []
 
+        # List all files in the directory
+        filenames = [f for f in os.listdir(directory) if os.path.isfile(os.path.join(directory, f))]
+        return filenames
 
-# URL of the playlist
+    except Exception as e:
+        print(f"An error occurred: {e}")
+        return []
+
 if __name__ == "__main__":
-    playlist_url = "https://www.youtube.com/watch?v=JOGQW70A_XE&list=PLW9qLa2D-k9VYQsHDJ3_jZyJ2WIs9VvXf"
+    # Replace this path with the directory you want to scan
+    directory_path = "C:\Kentucky Games"
+
+    # Get the list of files
+    files = list_files_in_directory(directory_path)
+
+    # Print the result
+    if files:
+        print("\nFiles in the directory:")
+        for file in files:
+            print(file)
+    else:
+        print("No files found in the directory.")
