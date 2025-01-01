@@ -20,6 +20,18 @@ def list_files_in_directory(directory):
     except Exception as e:
         print(f"An error occurred: {e}")
         return []
+    
+def separate_files_by_extension(filenames):
+    """
+    Separates filenames into two lists: one for '.mp4' files and one for '.description' files.
+
+    :param filenames: A list of filenames.
+    :return: A tuple containing two lists: (mp4_files, description_files).
+    """
+    mp4_files = [file for file in filenames if file.lower().endswith('.mp4')]
+    description_files = [file for file in filenames if file.lower().endswith('.description')]
+    
+    return mp4_files, description_files
 
 if __name__ == "__main__":
     # Replace this path with the directory you want to scan
@@ -28,10 +40,6 @@ if __name__ == "__main__":
     # Get the list of files
     files = list_files_in_directory(directory_path)
 
-    # Print the result
-    if files:
-        print("\nFiles in the directory:")
-        for file in files:
-            print(file)
-    else:
-        print("No files found in the directory.")
+    # separate the list of file names into .mp4 and .description
+    mp4_files, description_files = separate_files_by_extension(files)
+    
