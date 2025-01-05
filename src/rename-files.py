@@ -24,7 +24,7 @@ def list_files_in_directory(directory):
     
 def separate_files_by_extension(filenames):
     """
-    Separates filenames into two lists: one for '.mp4' files and one for '.description' files.
+    Separates filenames into two lists: one for '.mp4' files and one for '.txt' files.
 
     :param filenames: A list of filenames.
     :return: A tuple containing two lists: (mp4_files, description_files).
@@ -57,40 +57,89 @@ def find_and_format_date(file_path):
 def change_description_to_txt(directory):
     """
     Changes the file extension of all '.description' files in the given directory to '.txt'.
-
-    :param directory: The path to the directory to scan.
     """
-    # Check if the directory exists
     if not os.path.exists(directory):
         print(f"Error: Directory '{directory}' does not exist.")
         return
 
-    # Iterate over all files in the directory
     for filename in os.listdir(directory):
-        # Check if the file has a '.description' extension
         if filename.lower().endswith('.description'):
             old_path = os.path.join(directory, filename)
             new_path = os.path.join(directory, os.path.splitext(filename)[0] + '.txt')
-
-            # Rename the file
             os.rename(old_path, new_path)
 
-if __name__ == "__main__":
-    # Replace this path with the directory you want to scan
-    directory_path = "C:\Kentucky Games"
+def convert_filename(new_date, filename):
+    """
+    Convert the filename by adding the formatted date in the standard format.
+    
+    :param new_date: The formatted date to insert into the filename.
+    :param filename: The original filename to be converted.
+    :return: The new filename with the date inserted.
+    """
+    pattern = r'^\d{4}-\d{4} - Kentucky Basketball - '
+    new_filename = re.sub(pattern, f'UKMB {new_date} - ', filename)
+    return new_filename
 
-    # change the .description files to .txt
+def rename_files(directory, mp4_files, description_files, formatted_dates):
+    """
+    Renames the files in the directory based on the provided formatted dates, 
+    matching each .mp4 with its corresponding .txt and .jpg file.
+    
+    :param directory: The path to the directory to scan.
+    :param mp4_files: The list of .mp4 filenames.
+    :param description_files: The list of .txt filenames.
+    :param formatted_dates: The list of formatted dates.
+    """
+    for i, mp4_file in enumerate(mp4_files):
+        # Find the corresponding .txt file and .jpg thumbnail
+        base_filename = os.path.splitext(mp4_file)[0]
+        description_file = next((f for f in description_files if f.startswith(base_filename)), None)
+        jpg_file = base_filename + '.jpg'
+        
+        if description_file and i < len(formatted_dates):
+            # Get the formatted date for the current .mp4 file
+            formatted_date = formatted_dates[i]
+            
+            # Rename the .mp4 file
+            old_mp4_path = os.path.join(directory, mp4_file)
+            new_mp4_filename = convert_filename(formatted_date, mp4_file)
+            new_mp4_path = os.path.join(directory, new_mp4_filename)
+            os.rename(old_mp4_path, new_mp4_path)
+            
+            # Rename the .txt file
+            if description_file:
+                old_description_path = os.path.join(directory, description_file)
+                new_description_filename = convert_filename(formatted_date, description_file)
+                new_description_path = os.path.join(directory, new_description_filename)
+                os.rename(old_description_path, new_description_path)
+            
+            # Rename the .jpg file
+            if os.path.exists(os.path.join(directory, jpg_file)):
+                old_jpg_path = os.path.join(directory, jpg_file)
+                new_jpg_filename = convert_filename(formatted_date, jpg_file)
+                new_jpg_path = os.path.join(directory, new_jpg_filename)
+                os.rename(old_jpg_path, new_jpg_path)
+
+def main():
+    directory_path = r"C:\Kentucky Games"
     change_description_to_txt(directory_path)
-
-    # Get the list of files
+    
+    # Step 1: Get the list of files in the directory
     files = list_files_in_directory(directory_path)
 
-    # separate the list of file names into .mp4 and .txt
+    # Step 2: Separate the files by their extension
     mp4_files, description_files = separate_files_by_extension(files)
 
-    # list to hold the formatted dates
+    # Step 3: Extract formatted dates from the .txt description files
     formatted_dates = []
+    for description_file in description_files:
+        file_path = os.path.join(directory_path, description_file)
+        formatted_date = find_and_format_date(file_path)
+        if formatted_date:
+            formatted_dates.append(formatted_date)
 
-    # obtain the correctly formatted date from the video description
-    for file in description_files:
-        formatted_dates.append(find_and_format_date(f"{directory_path}\{file}"))
+    # Step 4: Rename the files based on the formatted dates
+    rename_files(directory_path, mp4_files, description_files, formatted_dates)
+
+if __name__ == "__main__":
+    main()
