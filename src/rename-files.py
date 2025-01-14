@@ -121,7 +121,7 @@ def rename_files(directory, mp4_files, description_files, formatted_dates):
                 os.rename(old_jpg_path, new_jpg_path)
 
 def main():
-    directory_path = r"C:\Kentucky Games"
+    directory_path = r"M:\Kentucky Games"
     change_description_to_txt(directory_path)
     
     # Step 1: Get the list of files in the directory
